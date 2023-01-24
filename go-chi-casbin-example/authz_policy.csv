@@ -1,0 +1,7 @@
+p, alice, /api/v1/, GET
+p, alice, /api/v1/data1, POST
+p, bob, /api/v1/resource1, *
+p, bob, /api/v1/resource2, GET
+p, bob, /api/v1/*, POST
+p, dataset1_admin, /dataset1/*, *
+g, cathy, dataset1_admin

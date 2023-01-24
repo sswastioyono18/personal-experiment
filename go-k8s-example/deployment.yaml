@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-go-app-img
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-app-img
+  template:
+    metadata:
+      labels:
+        app: go-app-img
+    spec:
+      containers:
+        - name: go-app-container
+          image: sactio1811/go-app-img
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
