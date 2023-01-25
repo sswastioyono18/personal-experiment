@@ -10,3 +10,8 @@ So initially you will store data into the DB after you consume it and create ano
 
 This time I tried to do the process without storing it into the DB.
 
+# Screenshots
+
+![Screenshot](docs/pub_sub.png)
+
+
