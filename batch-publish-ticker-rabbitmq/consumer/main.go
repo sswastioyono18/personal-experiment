@@ -50,13 +50,13 @@ func main() {
 	batch := make([]amqp.Delivery, 0, batchSize)
 	//lastMsgReceived := time.Now()
 	for {
-		timeout := time.After(3 * time.Second)
+		timeout := time.After(1 * time.Second)
 		// Wait for the specified amount of time
 		select {
 		case msg := <-msgs:
 			batch = append(batch, msg)
 			if len(batch) >= batchSize {
-				fmt.Printf("masuk ketika batch lebih besar dari %d", batchSize)
+				fmt.Printf("masuk ketika batch lebih besar dari %d \n\n", batchSize)
 				processBatch(batch)
 				batch = batch[:0]
 				msg.Ack(false)
@@ -64,6 +64,7 @@ func main() {
 			//lastMsgReceived = time.Now()
 		case <-timeout:
 			fmt.Println("masuk ketika ga ada message selama 3 detik")
+			fmt.Println("")
 			processBatchAck(batch)
 			batch = batch[:0]
 		}

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	batchSize = 10
-	batchWait = 1 * time.Second
+	batchSize = 5
+	batchWait = 3 * time.Second
 )
 
 func main() {
