@@ -1,12 +1,14 @@
-name: Pull Request Labeling
+name: Create Badge Coverage
 
 on:
   - push
 
 jobs:
-  triage:
+  create-coverage-badge:
     runs-on: ubuntu-latest
+
     steps:
+      name: Create coverage badge
       uses: emibcn/badge-action@v2.0.2
       with:
         label: 'Test coverage'
