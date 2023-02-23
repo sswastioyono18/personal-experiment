@@ -15,6 +15,12 @@ jobs:
         run: echo "branch=${GITHUB_REF#refs/heads/}" >> "${GITHUB_OUTPUT}"
         id: extract_branch
 
+
+      - uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+            token: ${{ secrets.GH_TOKEN }}
+
       - name: Prepare environment
         id: coverage
         run: |
@@ -26,13 +32,9 @@ jobs:
           echo "path=${BADGE_PATH}" >> $GITHUB_ENV
           echo "branch=${BRANCH}" >> $GITHUB_ENV
         env:
-          COVERAGE: 53.5%
+          COVERAGE: ${{ env.current_coverage }}
           BADGE_PATH: ${{ steps.extract_branch.outputs.branch }}/test-badge.svg
-          BRANCH: badges
-
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.coverage.outputs.branch }}
+          BRANCH: main
 
       # Create the directory where badges will be saved, if needed
       - name: Create destination directory
