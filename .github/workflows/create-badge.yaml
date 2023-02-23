@@ -64,8 +64,8 @@ jobs:
         env:
           BADGE: ${{ env.path }}
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "email.tyo@ggmail.com"
+          git config --local user.name "Sactio Swastioyono"
           git add "${{ env.path }}"
           git commit -m "Add/Update badge"
       - name: Push badge commit
