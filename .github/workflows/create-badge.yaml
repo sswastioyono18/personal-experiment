@@ -39,7 +39,7 @@ jobs:
       # Create the directory where badges will be saved, if needed
       - name: Create destination directory
         env:
-          BADGE_PATH: ${{ steps.coverage.outputs.path }}
+          BADGE_PATH: ${{ env.path }}
         run: mkdir -p "${{ env.path }}%/*"
 
       # Use the output from the `coverage` step
@@ -50,19 +50,19 @@ jobs:
           label: 'Test coverage'
           status: ${{ env.current_coverage }}
           color: 'blue,555,daf'
-          path: ${{ steps.coverage.outputs.path }}
+          path: ${{ env.path }}
 
       - name: Upload badge as artifact
         uses: actions/upload-artifact@v3
         with:
           name: badge
-          path: ${{ steps.coverage.outputs.path }}
+          path: ${{ env.path }}
           if-no-files-found: error
 
       - name: Commit badge
         continue-on-error: true
         env:
-          BADGE: ${{ steps.coverage.outputs.path }}
+          BADGE: ${{ env.path }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
