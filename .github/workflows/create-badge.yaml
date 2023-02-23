@@ -73,4 +73,4 @@ jobs:
         if: ${{ success() }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ steps.coverage.outputs.branch }}
+          branch: ${{ env.branch }}
