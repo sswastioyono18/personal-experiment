@@ -1,0 +1,15 @@
+name: Pull Request Labeling
+
+on:
+  - push
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: 'Test coverage'
+        status: '53.4%'
+        color: 'blue,555,daf'
+        path: '.github/badges/coverage.svg'
