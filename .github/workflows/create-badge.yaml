@@ -4,14 +4,71 @@ on:
   - push
 
 jobs:
-  create-coverage-badge:
+  test:
     runs-on: ubuntu-latest
-
+    name: A job to test this action
     steps:
-      - name: Create coverage badge
+
+      # Get current banch name to use it as dest directory
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> "${GITHUB_OUTPUT}"
+        id: extract_branch
+
+      - name: Prepare environment
+        id: coverage
+        run: |
+          go install github.com/jandelgado/gcov2lcov@latest
+          cd example-code-coverage
+          go test ./... -coverprofile=coverage.out -covermode=atomic
+          echo "current_coverage=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')" >> $GITHUB_ENV
+          # Output values to be used by other steps
+          echo "path=${BADGE_PATH}" >> $GITHUB_ENV
+          echo "branch=${BRANCH}" >> $GITHUB_ENV
+        env:
+          COVERAGE: 53.5%
+          BADGE_PATH: ${{ steps.extract_branch.outputs.branch }}/test-badge.svg
+          BRANCH: badges
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.coverage.outputs.branch }}
+
+      # Create the directory where badges will be saved, if needed
+      - name: Create destination directory
+        env:
+          BADGE_PATH: ${{ steps.coverage.outputs.path }}
+        run: mkdir -p "${{ env.path }}%/*"
+
+      # Use the output from the `coverage` step
+      - name: Generate the badge SVG image
         uses: emibcn/badge-action@v2.0.2
+        id: badge
         with:
           label: 'Test coverage'
-          status: '53.4%'
+          status: ${{ env.current_coverage }}
           color: 'blue,555,daf'
-          path: '.github/badges/coverage.svg'
+          path: ${{ steps.coverage.outputs.path }}
+
+      - name: Upload badge as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: badge
+          path: ${{ steps.coverage.outputs.path }}
+          if-no-files-found: error
+
+      - name: Commit badge
+        continue-on-error: true
+        env:
+          BADGE: ${{ steps.coverage.outputs.path }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add "${BADGE}"
+          git commit -m "Add/Update badge"
+      - name: Push badge commit
+        uses: ad-m/github-push-action@master
+        if: ${{ success() }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.coverage.outputs.branch }}
