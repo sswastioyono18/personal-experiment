@@ -58,18 +58,9 @@ jobs:
           path: ${{ env.path }}
           if-no-files-found: error
 
-      - name: Commit badge
-        continue-on-error: true
-        env:
-          BADGE: ${{ env.path }}
-        run: |
-          git config --local user.email "email.tyo@ggmail.com"
-          git config --local user.name "Sactio Swastioyono"
-          git add "${{ env.path }}"
-          git commit -m "Add/Update badge"
-      - name: Push badge commit
-        uses: ad-m/github-push-action@master
-        if: ${{ success() }}
+      - name: Push result to git
+        uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ env.current_coverage > env.master_coverage }}
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.branch }}
+          commit_message: 'chore(coverage): updated master coverage [skip ci]'
+          file_pattern: ${{ env.path }}
