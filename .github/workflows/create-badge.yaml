@@ -40,7 +40,7 @@ jobs:
         with:
           label: 'Code coverage'
           status: ${{ env.current_coverage }}
-          color: 'blue,555,daf'
+          color: 'green'
           path: ${{ env.path }}
 
       - name: Upload badge as artifact
