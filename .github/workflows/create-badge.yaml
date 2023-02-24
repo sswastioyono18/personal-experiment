@@ -12,7 +12,7 @@ jobs:
       # Get current banch name to use it as dest directory
       - name: Extract branch name
         shell: bash
-        run: echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_ENV"
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
         id: extract_branch
 
 
@@ -30,11 +30,10 @@ jobs:
           echo "current_coverage=$(go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')" >> $GITHUB_ENV
           # Output values to be used by other steps
           echo "path=${BADGE_PATH}" >> $GITHUB_ENV
-          echo "branch=${BRANCH}" >> $GITHUB_ENV
         env:
           COVERAGE: ${{ env.current_coverage }}
-          BADGE_PATH: ${{ steps.extract_branch.outputs.branch }}/test-badge.svg
-          BRANCH: main
+          BADGE_PATH: ${{ env.branch }}/test-badge.svg
+          BRANCH: ${{ env.branch }}
 
       # Create the directory where badges will be saved, if needed
       - name: Create destination directory
