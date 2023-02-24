@@ -1,6 +1,6 @@
 # personal-experiment
 
-Code Coverage : ![alt text](./github/badges/code-coverage.svg)
+Code Coverage : ![alt text](./.github/badges/code-coverage.svg)
 
 
 This repository contain my own experiment. 
