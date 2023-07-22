@@ -6,38 +6,48 @@ networks:
   kb-backend:
 
 services:
-#  loki:
-#    image: grafana/loki:2.6.1
-#    ports:
-#      - "3100"
-#    volumes:
-#      # directory must be created first, with uid:gid 10001:10001
-#      - ./volumes/loki:/loki
-#
-#  promtail:
-#    image: grafana/promtail:2.6.1
-#    volumes:
-#      # custom config will read logs from the containers of
-#      # this project
-#      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
-#      # to read container labels and logs
-#      - /var/run/docker.sock:/var/run/docker.sock
-#      - /var/lib/docker/containers:/var/lib/docker/containers
-#
-#  # will be available at http://127.0.0.1:3000
-#  # default credentials: admin/admin
-#  grafana:
-#    image: grafana/grafana:9.2.2
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      # directory must be created first, with uid:gid 472:472
-#      - ./volumes/grafana:/var/lib/grafana
-#      # automatically configure the loki datasource
-#      - ./loki/grafana/provisioning/:/etc/grafana/provisioning/
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - ./prometheus/data:/prometheus
+    ports:
+      - "9090:9090"
+  loki:
+    image: grafana/loki:2.6.1
+    ports:
+      - "3100"
+    volumes:
+      # directory must be created first, with uid:gid 10001:10001
+      - ./volumes/loki:/loki
+
+  promtail:
+    image: grafana/promtail:2.6.1
+    volumes:
+      # custom config will read logs from the containers of
+      # this project
+      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+
+  # will be available at http://127.0.0.1:3000
+  # default credentials: admin/admin
+  grafana:
+    image: grafana/grafana:9.2.2
+    ports:
+      - "3000:3000"
+    volumes:
+      # directory must be created first, with uid:gid 472:472
+      - ./volumes/grafana:/var/lib/grafana
+      # automatically configure the loki datasource
+      - ./loki/grafana/provisioning/:/etc/grafana/provisioning/
 
   app-image:
     build:
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8081:8080"
+      - "2112:2112"
