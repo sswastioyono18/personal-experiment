@@ -12,11 +12,19 @@ import (
 func recordMetrics() {
 	go func() {
 		for {
-			opsProcessed.Inc()
+			responseStatus.WithLabelValues("status").Inc()
 			time.Sleep(2 * time.Second)
 		}
 	}()
 }
+
+var responseStatus = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "http_response_status",
+		Help: "Status of HTTP response",
+	},
+	[]string{"status"},
+)
 
 var (
 	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
@@ -26,6 +34,8 @@ var (
 )
 
 func main() {
+	prometheus.MustRegister(responseStatus)
+
 	recordMetrics()
 
 	http.Handle("/metrics", promhttp.Handler())
