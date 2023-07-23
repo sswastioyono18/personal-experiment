@@ -1,0 +1,7 @@
+go-k8s-example/.idea
+example-code-coverage/.idea
+.idea
+go-prometheus-grafana/prometheus
+go-prometheus-grafana/volumes
+go-k8s-example/volumes/grafana
+go-k8s-example/volumes/loki

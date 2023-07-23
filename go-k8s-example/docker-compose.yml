@@ -6,15 +6,6 @@ networks:
   kb-backend:
 
 services:
-  prometheus:
-    image: prom/prometheus:latest
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    volumes:
-      - ./prometheus/config:/etc/prometheus
-      - ./prometheus/data:/prometheus
-    ports:
-      - "9090:9090"
   loki:
     image: grafana/loki:2.6.1
     ports:
@@ -49,5 +40,4 @@ services:
     build:
       dockerfile: Dockerfile
     ports:
-      - "8081:8080"
-      - "2112:2112"
+      - "8080:8080"
