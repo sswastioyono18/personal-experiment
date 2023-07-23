@@ -2,7 +2,10 @@ module github.com/kitabisa/go-k8s-example
 
 go 1.18
 
-require github.com/prometheus/client_golang v1.16.0
+require (
+	github.com/go-chi/chi/v5 v5.0.10
+	github.com/prometheus/client_golang v1.16.0
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

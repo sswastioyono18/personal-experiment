@@ -15,23 +15,6 @@ services:
       - ./prometheus/data:/prometheus
     ports:
       - "9090:9090"
-  loki:
-    image: grafana/loki:2.8.3
-    ports:
-      - "3100"
-    volumes:
-      # directory must be created first, with uid:gid 10001:10001
-      - ./volumes/loki:/loki
-
-  promtail:
-    image: grafana/promtail:2.8.3
-    volumes:
-      # custom config will read logs from the containers of
-      # this project
-      - ./loki/promtail-config.yaml:/etc/promtail/config.yml
-      # to read container labels and logs
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/containers:/var/lib/docker/containers
 
   # will be available at http://127.0.0.1:3000
   # default credentials: admin/admin
