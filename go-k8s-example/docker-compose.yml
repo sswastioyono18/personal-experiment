@@ -24,7 +24,7 @@ services:
       - ./volumes/loki:/loki
 
   promtail:
-    image: grafana/promtail:2.6.1
+    image: grafana/promtail:2.8.3
     volumes:
       # custom config will read logs from the containers of
       # this project
