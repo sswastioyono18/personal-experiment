@@ -37,7 +37,7 @@ func main() {
 	failOnError(err, "Failed to declare an exchange")
 
 	// Sample routing keys
-	routingKeys := []string{"routing.event.donation_verified"}
+	routingKeys := []string{"routing.event.donation_verified.to.santet.wa", "routing.event.donation_verified.to.suramadu.fbpixel"}
 
 	// Publish messages with different routing keys
 	for _, key := range routingKeys {
