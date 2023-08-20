@@ -72,7 +72,7 @@ func publisher() {
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(body),
-			Expiration:  "1000", // assume expire time
+			Expiration:  "5000", // assume expire time
 		},
 	)
 
@@ -137,16 +137,18 @@ func subscriber() {
 	)
 	failOnError(err, "Failed to declare a queue")
 
-	msgs, err := ch.Consume(
-		q.Name, // queue name
-		"",     // consumer
-		false,  // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	failOnError(err, "Failed to register a consumer")
+	fmt.Println(q)
+
+	//msgs, err := ch.Consume(
+	//	q.Name, // queue name
+	//	"",     // consumer
+	//	false,  // auto-ack
+	//	false,  // exclusive
+	//	false,  // no-local
+	//	false,  // no-wait
+	//	nil,    // args
+	//)
+	//failOnError(err, "Failed to register a consumer")
 
 	msgs1, err := ch.Consume(
 		q1.Name, // queue name
@@ -160,15 +162,16 @@ func subscriber() {
 
 	forever := make(chan bool)
 
-	go func() {
-		for d := range msgs {
-			fmt.Printf("payment created. main queue Received a message, wont ack. let it expire to go to DLQ: %s\n", d.Body)
-		}
-	}()
+	//go func() {
+	//	for d := range msgs {
+	//		fmt.Printf("payment created. main queue Received a message, wont ack. let it expire to go to DLQ: %s\n", d.Body)
+	//	}
+	//}()
 
 	go func() {
 		for d := range msgs1 {
-			fmt.Printf("dlq queue received a message. payment will be checked with expire status : %s\n", d.Body)
+			fmt.Printf("after 5 seconds, dlq queue received a message because message not consumed in mainq ueue. "+
+				"payment will be checked with expire status : %s\n", d.Body)
 			d.Ack(false)
 		}
 	}()
