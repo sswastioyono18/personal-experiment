@@ -178,4 +178,5 @@ func subscriber() {
 
 	fmt.Println("Waiting for messages. To exit press CTRL+C")
 	<-forever
+	
 }
