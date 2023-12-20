@@ -3,7 +3,7 @@ module github.com/kitabisa/go-k8s-example
 go 1.18
 
 require (
-	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/chi/v5 v5.0.11
 	github.com/rs/zerolog v1.28.0
 )
 
