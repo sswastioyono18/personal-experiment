@@ -3,7 +3,7 @@ module go-rabbitmq-expire-event
 go 1.20
 
 require (
-	github.com/go-redis/redis/v9 v9.1.0
+	github.com/go-redis/redis/v9 v9.3.1
 	github.com/streadway/amqp v1.1.0
 )
 
