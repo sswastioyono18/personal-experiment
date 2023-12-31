@@ -12,7 +12,7 @@ jobs:
       - name: Pushes test file
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+          API_TOKEN_GITHUB: ${{ secrets.GH_TOKEN }}
         with:
           source_file: 'README.md'
           destination_repo: 'sswastioyono18/multiple-swagger-openapi'
