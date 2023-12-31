@@ -9,10 +9,10 @@ jobs:
     name: A job to test this action
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-            fetch-depth: 0
-            token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare environment
         id: coverage

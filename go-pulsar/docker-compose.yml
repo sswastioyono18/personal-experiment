@@ -1,0 +1,9 @@
+version: '3'
+services:
+  pulsar:
+    image: apachepulsar/pulsar:latest
+    container_name: pulsar
+    ports:
+      - 6650:6650  # Pulsar broker port
+      - 8080:8080  # Pulsar admin web UI
+    command: bin/pulsar standalone

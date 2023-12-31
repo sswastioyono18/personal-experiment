@@ -1,0 +1,22 @@
+name: Push File
+
+on: push
+
+jobs:
+  copy-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Pushes test file
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          source_file: 'README.md'
+          destination_repo: 'sswastioyono18/multiple-swagger-openapi'
+          destination_folder: 'openapi'
+          user_email: 'engineer@kitabisa.com'
+          user_name: 'engineer'
+          commit_message: 'A custom message for the commit'
