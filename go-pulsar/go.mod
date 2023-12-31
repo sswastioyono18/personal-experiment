@@ -2,7 +2,7 @@ module go-pulsar
 
 go 1.20
 
-require github.com/apache/pulsar-client-go v0.11.0
+require github.com/apache/pulsar-client-go v0.11.1
 
 require (
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
