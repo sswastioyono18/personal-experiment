@@ -1,6 +1,9 @@
 name: Push File
 
-on: push
+on:
+  push:
+    branches: [ "main", "master" ]
+
 
 jobs:
   copy-file:
