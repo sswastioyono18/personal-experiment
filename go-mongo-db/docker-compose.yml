@@ -1,7 +1,7 @@
 version: '3'
 services:
   mongodb:
-    image: mongo
+    image: mongo@sha256:d14158139a0bbc1741136d3eded7bef018a5980760a57f0014a1d4ac7677e4b1
     container_name: mongodb
     ports:
       - "27017:27017"

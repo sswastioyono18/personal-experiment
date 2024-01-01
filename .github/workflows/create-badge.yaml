@@ -9,7 +9,7 @@ jobs:
     name: A job to test this action
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Prepare environment
         id: coverage
@@ -32,7 +32,7 @@ jobs:
 
       # Use the output from the `coverage` step
       - name: Generate the badge SVG image
-        uses: emibcn/badge-action@v2.0.2
+        uses: emibcn/badge-action@4209421db54c8764d8932070ffd0f81715a629bf # v2.0.2
         id: badge
         with:
           label: 'Code coverage'
@@ -41,14 +41,14 @@ jobs:
           path: ${{ env.path }}
 
       - name: Upload badge as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
         with:
           name: badge
           path: ${{ env.path }}
           if-no-files-found: error
 
       - name: Push result to git
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4
         with:
           commit_message: 'chore(coverage): updated master coverage [skip ci]'
           file_pattern: ${{ env.path }}
