@@ -68,8 +68,11 @@ func main() {
 		r.Route("/api/v1", func(r chi.Router) {
 			r.Use(tokenMiddleware)
 			r.Use(Authorizer(e))
-			r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("bisa akses get endpoint data1"))
+			r.Get("/admin/index", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses admin index"))
+			})
+			r.Get("/admin/list", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses admin list"))
 			})
 			r.Get("/member", func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("bisa akses post endpoint data1"))
@@ -318,7 +321,7 @@ func Authorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
 
 			method := r.Method
 			path := r.URL.Path
-			has, err := e.Enforce(userClaim.Role, path, method)
+			has, err := e.Enforce(userClaim.Username, path, method)
 			if err != nil {
 				fmt.Println(err)
 			}
