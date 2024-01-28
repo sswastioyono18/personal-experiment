@@ -65,52 +65,53 @@ func main() {
 	}
 
 	router.Group(func(r chi.Router) {
-		r.Route("/api/v1", func(r chi.Router) {
+		r.Route("/api/v1/admin", func(r chi.Router) {
 			r.Use(tokenMiddleware)
 			r.Use(Authorizer(e))
-			r.Get("/admin/index", func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("bisa akses admin index"))
-			})
-			r.Get("/admin/list", func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("bisa akses admin list"))
-			})
-			r.Get("/member", func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("bisa akses post endpoint data1"))
+			r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Get admin index"))
 			})
 
-			r.Get("/superadmin", func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("bisa akses endpoint data2"))
+			r.Post("/list", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Post admin list"))
+			})
+
+			r.Put("/update", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Put admin update"))
 			})
 		})
-	})
 
-	// define your handler, this is just an example to return HTTP 200 for any requests.
-	// the access that is denied by authz will return HTTP 403 error.
-	router.Get("/api/v2/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		w.Write([]byte("GET api v2"))
-	})
+		r.Route("/api/v1/partner", func(r chi.Router) {
+			r.Use(tokenMiddleware)
+			r.Use(Authorizer(e))
+			r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Get partner index"))
+			})
 
-	router.Post("/api/v2/test", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-		w.Write([]byte("POST api v2"))
-	})
+			r.Post("/list", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Post partner list"))
+			})
 
-	router.Post("/api/v2/updatepolicy", func(w http.ResponseWriter, r *http.Request) {
-		res, err := e.AddPolicy("alice", "/api/v1/data1", "GET")
-		if err != nil {
-			panic(err)
-		}
+			r.Put("/update", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Put partner update"))
+			})
+		})
 
-		fmt.Println(res)
-		err = e.SavePolicy()
+		r.Route("/api/v1/superadmin", func(r chi.Router) {
+			r.Use(tokenMiddleware)
+			r.Use(Authorizer(e))
+			r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Get superadmin index"))
+			})
 
-		if err != nil {
-			panic(err)
-		}
+			r.Post("/list", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Post superadmin list"))
+			})
 
-		w.WriteHeader(200)
-		w.Write([]byte("POST api update policy"))
+			r.Put("/update", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("bisa akses Put superadmin update"))
+			})
+		})
 	})
 
 	router.Post("/login", loginHandler)
