@@ -28,21 +28,22 @@ func publisher() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	queueName := "main_queue"
+	exchangeName := "promotion_exchange"
+	queueName := "promotion_queue"
 	err = ch.ExchangeDeclare(
-		queueName, // exchange name
-		"direct",  // exchange type
-		true,      // durable
-		false,     // auto-deleted
-		false,     // internal
-		false,     // no-wait
-		nil,       // arguments
+		exchangeName, // exchange name
+		"direct",     // exchange type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
 	)
 	failOnError(err, "Failed to declare an exchange")
 
 	args := amqp.Table{
-		"x-dead-letter-exchange":    "dlx_exchange",
-		"x-dead-letter-routing-key": "dlq",
+		"x-dead-letter-exchange":    "dlx_promotion_exchange",
+		"x-dead-letter-routing-key": "dlq_routing_promotion_applied",
 	}
 	_, err = ch.QueueDeclare(
 		queueName, // queue name
@@ -55,9 +56,9 @@ func publisher() {
 	failOnError(err, "Failed to declare a queue")
 
 	err = ch.QueueBind(
-		queueName, // queue name
-		"key",     // routing key
-		queueName, // exchange name
+		queueName,           // queue name
+		"promotion_applied", // routing key
+		exchangeName,        // exchange name
 		false,
 		nil,
 	)
@@ -65,8 +66,8 @@ func publisher() {
 
 	body := "Trx Id #1 Publish Pay Created!"
 	err = ch.Publish(
-		queueName, // exchange name
-		"key",     // routing key
+		exchangeName,        // exchange name
+		"promotion_applied", // routing key
 		false,
 		false,
 		amqp.Publishing{
@@ -89,7 +90,7 @@ func subscriber() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	dlxName := "dlx_exchange"
+	dlxName := "dlx_promotion_exchange"
 	err = ch.ExchangeDeclare(
 		dlxName,  // exchange name
 		"direct", // exchange type
@@ -102,11 +103,11 @@ func subscriber() {
 	failOnError(err, "Failed to declare DLX exchange")
 
 	args := amqp.Table{
-		"x-dead-letter-exchange":    "dlx_exchange",
-		"x-dead-letter-routing-key": "dlq",
+		"x-dead-letter-exchange":    dlxName,
+		"x-dead-letter-routing-key": "dlq_routing_promotion_applied",
 	}
 
-	dlqName := "dlq"
+	dlqName := "dlq_promotion_applied"
 	q1, err := ch.QueueDeclare(
 		dlqName, // queue name
 		true,    // durable
@@ -118,15 +119,15 @@ func subscriber() {
 	failOnError(err, "Failed to declare DLQ queue")
 
 	err = ch.QueueBind(
-		dlqName, // queue name
-		"dlq",   // routing key
-		dlxName, // exchange name
+		dlqName,                         // queue name
+		"dlq_routing_promotion_applied", // routing key
+		dlxName,                         // exchange name
 		false,
 		nil,
 	)
 	failOnError(err, "Failed to bind DLQ queue")
 
-	queueName := "main_queue"
+	queueName := "promotion_queue"
 	q, err := ch.QueueDeclare(
 		queueName, // queue name
 		true,      // durable
