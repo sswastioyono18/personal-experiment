@@ -1,7 +1,7 @@
 version: '3'
 services:
   pulsar:
-    image: apachepulsar/pulsar:latest@sha256:dffa50e8e32603fdad4dcae02760fdb36f0ec5554651ab0917f4df5e9fcc417d
+    image: apachepulsar/pulsar:latest@sha256:9d6cd5cec2992d004b416f9316a8db976d0552f99617a991a72eb31b85683034
     container_name: pulsar
     ports:
       - 6650:6650  # Pulsar broker port
