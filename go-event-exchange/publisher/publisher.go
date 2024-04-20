@@ -1,58 +1,75 @@
 package main
 
 import (
-	"fmt"
-	"github.com/streadway/amqp"
+	"context"
 	"log"
+	"os"
+	"strings"
+	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
+		log.Panicf("%s: %s", msg, err)
 	}
 }
 
 func main() {
-	// Connect to RabbitMQ server
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
-	// Create a channel
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	// Declare a topic exchange
-	exchangeName := "event_exchange"
 	err = ch.ExchangeDeclare(
-		exchangeName,
-		"topic",
-		true,  // durable
-		false, // auto-deleted
-		false, // internal
-		false, // no-wait
-		nil,
+		"logs_topic", // name
+		"topic",      // type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
 	)
 	failOnError(err, "Failed to declare an exchange")
 
-	// Sample routing keys
-	routingKeys := []string{"routing.event.donation_verified.to.santet.wa", "routing.event.donation_verified.to.suramadu.fbpixel"}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	// Publish messages with different routing keys
-	for _, key := range routingKeys {
-		message := fmt.Sprintf("Message with routing key '%s'", key)
-		err = ch.Publish(
-			exchangeName,
-			key,
-			false,
-			false,
-			amqp.Publishing{
-				ContentType: "text/plain",
-				Body:        []byte(message),
-			},
-		)
-		failOnError(err, "Failed to publish a message")
-		fmt.Printf("Sent: %s\n", message)
+	body := bodyFrom(os.Args)
+	err = ch.PublishWithContext(ctx,
+		"logs_topic",          // exchange
+		severityFrom(os.Args), // routing key
+		false,                 // mandatory
+		false,                 // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(body),
+		})
+	failOnError(err, "Failed to publish a message")
+
+	log.Printf(" [x] Sent %s", body)
+}
+
+func bodyFrom(args []string) string {
+	var s string
+	if (len(args) < 3) || os.Args[2] == "" {
+		s = "hello"
+	} else {
+		s = strings.Join(args[2:], " ")
 	}
+	return s
+}
+
+func severityFrom(args []string) string {
+	var s string
+	if (len(args) < 2) || os.Args[1] == "" {
+		s = "anonymous.info"
+	} else {
+		s = os.Args[1]
+	}
+	return s
 }

@@ -30,6 +30,22 @@ func finalizer(db *sqlx.DB) {
 
 var DB *sql.DB
 
+func loadPolicy(e *casbin.Enforcer) {
+	// Create a ticker that ticks every 5 seconds
+	ticker := time.NewTicker(5 * time.Second)
+
+	// Run the command when the ticker ticks
+	for {
+		select {
+		case <-ticker.C:
+			// Replace the following line with the command you want to run
+			if err := e.LoadPolicy(); err != nil {
+				log.Println("LoadPolicy failed, err: ", err)
+			}
+		}
+	}
+}
+
 func main() {
 	dataSourceName := fmt.Sprintf("user=root password=pass host=localhost port=5432 dbname=casbin sslmode=disable")
 
@@ -64,9 +80,11 @@ func main() {
 		log.Println("LoadPolicy failed, err: ", err)
 	}
 
+	// Load the policy from DB every 5 seconds
+	go loadPolicy(e)
+
 	router.Group(func(r chi.Router) {
 		r.Route("/api/v1/admin", func(r chi.Router) {
-			r.Use(tokenMiddleware)
 			r.Use(Authorizer(e))
 			r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("bisa akses Get admin index"))
@@ -82,7 +100,6 @@ func main() {
 		})
 
 		r.Route("/api/v1/partner", func(r chi.Router) {
-			r.Use(tokenMiddleware)
 			r.Use(Authorizer(e))
 			r.Get("/index", func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("bisa akses Get partner index"))
@@ -112,6 +129,24 @@ func main() {
 				w.Write([]byte("bisa akses Put superadmin update"))
 			})
 		})
+	})
+
+	router.Post("/api/v1/updatepolicy", func(w http.ResponseWriter, r *http.Request) {
+		res, err := e.AddPolicy("alice", "/api/v1/data1", "GET")
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(res)
+		err = e.SavePolicy()
+
+		if err != nil {
+			panic(err)
+		}
+
+		w.WriteHeader(200)
+		w.Write([]byte("POST api update policy"))
+
 	})
 
 	router.Post("/login", loginHandler)
@@ -314,15 +349,16 @@ func tokenMiddleware(next http.Handler) http.Handler {
 func Authorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			userClaim, ok := r.Context().Value("claims").(*CustomClaims)
-			if !ok {
-				http.Error(w, http.StatusText(403), 403)
-				return
-			}
+			//_, ok := r.Context().Value("claims").(*CustomClaims)
+			//if !ok {
+			//	http.Error(w, http.StatusText(403), 403)
+			//	return
+			//}
 
 			method := r.Method
 			path := r.URL.Path
-			has, err := e.Enforce(userClaim.Username, path, method)
+			username := "tio"
+			has, err := e.Enforce(username, path, method)
 			if err != nil {
 				fmt.Println(err)
 			}
