@@ -24,10 +24,3 @@ jobs:
           target_branch: main
           title: My pull request
           label: enhancement
-          milestone: My milestone
-          draft: true
-          old_string: "<!-- Add your description here -->"
-          new_string: "** Automatic pull request**"
-          get_diff: true
-          ignore_users: "dependabot"
-          allow_no_diff: false
