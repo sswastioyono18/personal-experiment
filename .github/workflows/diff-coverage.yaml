@@ -1,9 +1,9 @@
 name: Calculate diff
 
 on:
-    pull_request:
-        branches:
-            - main
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
 
 jobs:
   build:
