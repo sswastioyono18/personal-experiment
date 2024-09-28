@@ -23,4 +23,4 @@ jobs:
           target_branch: main
           title: My pull request
           label: enhancement
-          template: 'pull_request_template.md
+          template: 'pull_request_template.md'
