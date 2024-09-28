@@ -9,7 +9,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Make changes to pull request
         run: date +%s > report.txt
@@ -20,3 +22,5 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
           target_branch: main
           title: My pull request
+          label: enhancement
+          template: 'pull_request_template.md
