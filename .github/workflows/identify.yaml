@@ -25,9 +25,22 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/commits/${{ env.sha }}/pulls" > pr.json
           cat pr.json
 
-      - name: Display Pull Request Info
+      - name: Get PR Details
+        id: get-pr-details
         run: |
           PR_NUMBER=$(jq -r '.[0].number' pr.json)
-          PR_TITLE=$(jq -r '.[0].title' pr.json)
-          echo "Merged PR Number: $PR_NUMBER"
-          echo "Merged PR Title: $PR_TITLE"
+          echo "Fetching details for PR #$PR_NUMBER"
+          curl -s -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" > pr_details.json
+          cat pr_details.json
+
+      - name: Extract PR Author
+        id: extract-pr-author
+        run: |
+          PR_AUTHOR=$(jq -r '.user.login' pr_details.json)
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
+
+      - name: Display PR Author
+        run: |
+          echo "The PR author is: ${{ env.PR_AUTHOR }}"
