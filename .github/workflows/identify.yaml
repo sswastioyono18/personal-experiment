@@ -1,4 +1,4 @@
-name: Identify Merged Pull Request
+name: Fetch PR Author and Reviewers
 
 on:
   push:
@@ -6,56 +6,52 @@ on:
       - main
 
 jobs:
-  find-merged-pr:
+  fetch-pr-details:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Get Commit SHA
-        id: get-sha
-        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-      - name: Fetch Associated Pull Request
-        id: fetch-pr
+      - name: Get Pull Request Info
+        id: get-pr-info
         run: |
-          echo "Fetching pull request for commit ${{ env.sha }}"
-          curl -s -H "Accept: application/vnd.github.groot-preview+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/commits/${{ env.sha }}/pulls" > pr.json
-          cat pr.json
+          # Fetch the PR that triggered the push
+          PR_NUMBER=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+            -H "Accept: application/vnd.github.groot-preview+json" | jq -r '.[0].number')
+          
+          echo "Pull Request Number: $PR_NUMBER"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
 
-      - name: Get Reviews for PR
-        id: get-reviews
+      - name: Get PR Author and Reviews
+        id: get-pr-details
         run: |
-          PR_NUMBER=$(jq -r '.[0].number' pr.json)
-          echo "Fetching reviews for PR #$PR_NUMBER"
-          curl -s -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews" > reviews.json
-
-      - name: Process Reviews
-        id: process-reviews
-        run: |
-          APPROVED=$(jq -r '[.[] | select(.state == "APPROVED") | .user.login] | unique | join(", ")' reviews.json)
-          NOT_APPROVED=$(jq -r '[.[] | select(.state != "APPROVED") | .user.login] | unique | join(", ")' reviews.json)
-
+          # Fetch PR details (to get author)
+          PR_DETAILS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER")
+          
+          PR_AUTHOR=$(echo "$PR_DETAILS" | jq -r '.user.login')
+          echo "PR Author: $PR_AUTHOR"
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
+          
+          # Fetch PR reviews
+          REVIEWS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews")
+          
+          # Extract approved reviewers
+          APPROVED=$(echo "$REVIEWS" | jq -r '[.[] | select(.state == "APPROVED") | .user.login] | unique | join(", ")')
+          NOT_APPROVED=$(echo "$REVIEWS" | jq -r '[.[] | select(.state != "APPROVED") | .user.login] | unique | join(", ")')
+          
           echo "Approved Reviewers: $APPROVED"
           echo "Not Approved Reviewers: $NOT_APPROVED"
+          
+          # Export to environment variables
           echo "APPROVED=$APPROVED" >> $GITHUB_ENV
           echo "NOT_APPROVED=$NOT_APPROVED" >> $GITHUB_ENV
 
-      - name: Display Reviewers
+      - name: Display Results
         run: |
-          echo "The following reviewers approved the PR: ${{ env.APPROVED }}"
-          echo "The following reviewers did not approve the PR: ${{ env.NOT_APPROVED }}"
-
-      - name: Extract PR Author
-        id: extract-pr-author
-        run: |
-          PR_AUTHOR=$(jq -r '.user.login' pr_details.json)
-          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
-
-      - name: Display PR Author
-        run: |
-          echo "The PR author is: ${{ env.PR_AUTHOR }}"
+          echo "Pull Request Author: ${{ env.PR_AUTHOR }}"
+          echo "Approved Reviewers: ${{ env.APPROVED }}"
+          echo "Not Approved Reviewers: ${{ env.NOT_APPROVED }}"
