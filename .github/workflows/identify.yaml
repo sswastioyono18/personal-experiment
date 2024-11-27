@@ -1,0 +1,33 @@
+name: Identify Merged Pull Request
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  find-merged-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Commit SHA
+        id: get-sha
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Fetch Associated Pull Request
+        id: fetch-pr
+        run: |
+          echo "Fetching pull request for commit ${{ env.sha }}"
+          curl -s -H "Accept: application/vnd.github.groot-preview+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ env.sha }}/pulls" > pr.json
+          cat pr.json
+
+      - name: Display Pull Request Info
+        run: |
+          PR_NUMBER=$(jq -r '.[0].number' pr.json)
+          PR_TITLE=$(jq -r '.[0].title' pr.json)
+          echo "Merged PR Number: $PR_NUMBER"
+          echo "Merged PR Title: $PR_TITLE"
