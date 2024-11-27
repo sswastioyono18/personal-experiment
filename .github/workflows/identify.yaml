@@ -25,15 +25,30 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/commits/${{ env.sha }}/pulls" > pr.json
           cat pr.json
 
-      - name: Get PR Details
-        id: get-pr-details
+      - name: Get Reviews for PR
+        id: get-reviews
         run: |
           PR_NUMBER=$(jq -r '.[0].number' pr.json)
-          echo "Fetching details for PR #$PR_NUMBER"
+          echo "Fetching reviews for PR #$PR_NUMBER"
           curl -s -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" > pr_details.json
-          cat pr_details.json
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews" > reviews.json
+
+      - name: Process Reviews
+        id: process-reviews
+        run: |
+          APPROVED=$(jq -r '[.[] | select(.state == "APPROVED") | .user.login] | unique | join(", ")' reviews.json)
+          NOT_APPROVED=$(jq -r '[.[] | select(.state != "APPROVED") | .user.login] | unique | join(", ")' reviews.json)
+
+          echo "Approved Reviewers: $APPROVED"
+          echo "Not Approved Reviewers: $NOT_APPROVED"
+          echo "APPROVED=$APPROVED" >> $GITHUB_ENV
+          echo "NOT_APPROVED=$NOT_APPROVED" >> $GITHUB_ENV
+
+      - name: Display Reviewers
+        run: |
+          echo "The following reviewers approved the PR: ${{ env.APPROVED }}"
+          echo "The following reviewers did not approve the PR: ${{ env.NOT_APPROVED }}"
 
       - name: Extract PR Author
         id: extract-pr-author
