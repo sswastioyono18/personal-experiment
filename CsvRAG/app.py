@@ -120,18 +120,20 @@ def perform_matching(df1, df2, selected_rules, transaction_type):
     df1_exploded = df1.explode("unique_code_variants")
     df1_exploded.rename(columns={"unique_code_variants": "amount_unique_code"}, inplace=True)
 
-    # Always do amount matching
-    matched_df = df1_exploded.merge(df2, how="inner", left_on="amount_unique_code", right_on="credit")
+    # Start with a cross join to get all possible combinations
+    matched_df = df1_exploded.merge(df2, how="cross")
 
-    if matched_df.empty:
-        st.warning("⚠️ No matches found after applying Amount Match.")
-        return None
+    # Apply each selected rule independently
+    if "Amount Match" in selected_rules:
+        matched_df = matched_df[matched_df["amount_unique_code"] == matched_df["credit"]]
+        if matched_df.empty:
+            st.warning("⚠️ No matches found after applying Amount Match.")
+            return None
 
     if "Name Match" in selected_rules:
         matched_df = matched_df[
             matched_df.apply(lambda row: is_partial_match(row.get("full_name", ""), row.get("description", "")), axis=1)
         ]
-
         if matched_df.empty:
             st.warning("⚠️ No matches found after applying Name Match.")
             return None
@@ -140,7 +142,6 @@ def perform_matching(df1, df2, selected_rules, transaction_type):
         matched_df = matched_df[
             (matched_df["created"] - matched_df["transfer_time"]).abs() <= pd.Timedelta(hours=24)
         ]
-
         if matched_df.empty:
             st.warning("⚠️ No matches found after applying Time Match.")
             return None
